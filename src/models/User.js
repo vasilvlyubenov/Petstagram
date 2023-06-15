@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     }
 });
 
-userSchema.virtual('re-password').set(function(value) {
+userSchema.virtual('rePassword').set(function(value) {
     if (this.password !== value) {
         throw new Error('Password mismatch!');
     }
