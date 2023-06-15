@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
     username: {
@@ -15,6 +16,20 @@ const userSchema = new mongoose.Schema({
         required: [true, 'Password is required!'],
     }
 });
+
+userSchema.virtual('re-password').set(function(value) {
+    if (this.password !== value) {
+        throw new Error('Password mismatch!');
+    }
+});
+
+
+userSchema.pre('save', async function() {
+    const hash = await bcrypt.hash(this.password, 10);
+
+    this.password = hash;
+});
+
 
 const User = mongoose.model('User', userSchema);
 
