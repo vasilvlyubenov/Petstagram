@@ -5,6 +5,8 @@ const handlebarsConfig = require('./config/handlebarsConfig');
 const dbConnect = require('./config/dbConfig');
 const PORT = 3000;
 
+const routes = require('./routes');
+
 const app = express();
 
 dbConnect()
@@ -19,5 +21,6 @@ handlebarsConfig(app);
 app.get('/', (req, res) => {
     res.render('home');
 });
+app.use(routes);
 
 app.listen(PORT, () => { console.log(`Server is listening on port ${PORT}...`); });
