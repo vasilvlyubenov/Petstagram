@@ -3,7 +3,7 @@ const userService = require('../services/userService');
 const { getErrorMessages } = require('../utils/errorHelper');
 
 router.get('/register', (req, res) => {
-    res.render('register');
+    res.render('users/register');
 });
 
 router.post('/register', async (req, res) => {
@@ -13,17 +13,17 @@ router.post('/register', async (req, res) => {
         res.redirect('/');
     } catch (error) {
         const err = getErrorMessages(error)[0];
-        res.render('register', { error: err });
+        res.render('users/register', { error: err });
     }
 });
 
 router.get('/login', (req, res) => {
-    res.render('login');
+    res.render('users/login');
 });
 
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
-    console.log(username);
+    
     try {
         const token = await userService.login(username, password);
         res.cookie('auth', token, {httpOnly: true});
@@ -31,12 +31,16 @@ router.post('/login', async (req, res) => {
         res.redirect('/');
     } catch (error) {
         const err = getErrorMessages(error)[0];
-        res.render('login', { error: err });
+        res.render('users/login', { error: err });
     }
 });
 
 router.get('/logout', (req, res) => {
     res.clearCookie('auth');
     res.redirect('/');
+});
+
+router.get('/profile', (req, res) => {
+    res.render('users/profile');
 });
 module.exports = router;

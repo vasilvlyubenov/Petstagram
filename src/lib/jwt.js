@@ -14,7 +14,7 @@ const sign = (payload, secret, options) => {
 
 const verify = (token, secret) => {
     const promise = new Promise((resolve, reject) => {
-        jsonwebtoken.sign(token, secret, (err, result) => {
+        jsonwebtoken.verify(token, secret, (err, result) => {
             if (err) {
                 return reject(err);
             }
