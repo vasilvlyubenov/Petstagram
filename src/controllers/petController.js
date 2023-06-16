@@ -7,7 +7,7 @@ const { isAuth } = require('../middleware/authMiddleware');
 router.get('/catalog', async (req, res) => {
     try {
         const pets = await Pet.find().populate('owner').lean();
-        
+
         res.render('pets/catalog', { pets });
     } catch (error) {
         const err = getErrorMessages(error)[0];
@@ -38,14 +38,14 @@ router.post('/add-photo', isAuth, async (req, res) => {
 
 router.get('/:petId/details', async (req, res) => {
     const petId = req.params.petId;
-    
+
     try {
         const pet = await petService.getById(petId).populate('owner').populate('commentList.userID').lean();
-        
+
         const isOwner = req.user?._id === pet.owner._id.toString();
         const isLogged = !isOwner && res.locals.user !== undefined;
-        
-        res.render('pets/details', {pet, isOwner, isLogged});
+
+        res.render('pets/details', { pet, isOwner, isLogged });
     } catch (error) {
         res.status(400).redirect('404');
     }
@@ -68,7 +68,19 @@ router.post('/:petId/comment', async (req, res) => {
         res.redirect(`/pets/${petId}/details`);
     } catch (error) {
         const err = getErrorMessages(error)[0];
-        res.render(`/pets/${petId}/details`, { error: err });
+        res.render(`pets/${petId}/details`, { error: err });
+    }
+});
+
+router.get('/:petId/delete', async (req, res) => {
+    const petId = req.params.petId;
+    try {
+        await petService.delete(petId);
+
+        res.redirect('/pets/catalog');
+    } catch (error) {
+        const err = getErrorMessages(error)[0];
+        res.render(`pets/${petId}/details`, { error: err });
     }
 });
 
