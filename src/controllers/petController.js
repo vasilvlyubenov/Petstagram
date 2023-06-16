@@ -52,7 +52,7 @@ router.get('/:petId/details', async (req, res) => {
 
 });
 
-router.post('/:petId/comment', async (req, res) => {
+router.post('/:petId/comment', isAuth, async (req, res) => {
     const petId = req.params.petId;
 
     const object = {
@@ -72,8 +72,9 @@ router.post('/:petId/comment', async (req, res) => {
     }
 });
 
-router.get('/:petId/delete', async (req, res) => {
+router.get('/:petId/delete', isAuth, async (req, res) => {
     const petId = req.params.petId;
+
     try {
         await petService.delete(petId);
 
@@ -81,6 +82,32 @@ router.get('/:petId/delete', async (req, res) => {
     } catch (error) {
         const err = getErrorMessages(error)[0];
         res.render(`pets/${petId}/details`, { error: err });
+    }
+});
+
+router.get('/:petId/edit', isAuth, async (req, res) => {
+    const petId = req.params.petId;
+
+    try {
+        const pet = await petService.getById(petId).lean();
+
+        res.render('pets/edit', { pet });
+    } catch (error) {
+        const err = getErrorMessages(error)[0];
+        res.render(`pets/${petId}/details`, { error: err });
+    }
+
+});
+
+router.post('/:petId/edit', isAuth, async (req, res) => {
+    const petId = req.params.petId;
+    const petDdata = req.body;
+    try {
+        await petService.update(petId, petDdata);
+        res.redirect(`/pets/${petId}/details`);
+    } catch (error) {
+        const err = getErrorMessages(error)[0];
+        res.render(`pets/${petId}/edit`, { error: err });
     }
 });
 
