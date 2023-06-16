@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Pet = require('../models/Pet');
 
 const bcrypt = require('bcrypt');
 const jwt = require('../lib/jwt');
@@ -28,3 +29,5 @@ exports.login = async (username, password) => {
 
     return token;
 };
+
+exports.findbyUser = (userId) => Pet.find({owner: userId});
