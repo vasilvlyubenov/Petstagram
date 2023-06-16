@@ -32,6 +32,7 @@ const petSchema = new mongoose.Schema({
     commentList: [{
         userID: {
             type: mongoose.Types.ObjectId,
+            ref: 'User',
         },
         comment: {
             type: String,

@@ -2,11 +2,12 @@ const router = require('express').Router();
 const Pet = require('../models/Pet');
 const petService = require('../services/petService');
 const { getErrorMessages } = require('../utils/errorHelper');
+const { isAuth } = require('../middleware/authMiddleware');
 
 router.get('/catalog', async (req, res) => {
     try {
         const pets = await Pet.find().populate('owner').lean();
-        console.log(pets);
+        
         res.render('pets/catalog', { pets });
     } catch (error) {
         const err = getErrorMessages(error)[0];
@@ -15,11 +16,11 @@ router.get('/catalog', async (req, res) => {
 
 });
 
-router.get('/add-photo', (req, res) => {
+router.get('/add-photo', isAuth, (req, res) => {
     res.render('pets/create');
 });
 
-router.post('/add-photo', async (req, res) => {
+router.post('/add-photo', isAuth, async (req, res) => {
     const petData = {
         ...req.body,
         owner: req.user._id,
@@ -30,10 +31,45 @@ router.post('/add-photo', async (req, res) => {
         res.redirect('/pets/catalog');
     } catch (error) {
         const err = getErrorMessages(error)[0];
-        res.render('pets/create', { error: err, petData });
+        res.render('pets/create', { error: err });
     }
 
 });
 
+router.get('/:petId/details', async (req, res) => {
+    const petId = req.params.petId;
+    
+    try {
+        const pet = await petService.getById(petId).populate('owner').populate('commentList.userID').lean();
+        
+        const isOwner = req.user?._id === pet.owner._id.toString();
+        const isLogged = !isOwner && res.locals.user !== undefined;
+        
+        res.render('pets/details', {pet, isOwner, isLogged});
+    } catch (error) {
+        res.status(400).redirect('404');
+    }
+
+});
+
+router.post('/:petId/comment', async (req, res) => {
+    const petId = req.params.petId;
+
+    const object = {
+        userID: req.user._id,
+        comment: req.body.comment,
+    };
+
+    try {
+        const pet = await petService.getById(petId);
+        pet.commentList.push(object);
+        pet.save();
+
+        res.redirect(`/pets/${petId}/details`);
+    } catch (error) {
+        const err = getErrorMessages(error)[0];
+        res.render(`/pets/${petId}/details`, { error: err });
+    }
+});
 
 module.exports = router;
